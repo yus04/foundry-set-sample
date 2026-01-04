@@ -12,8 +12,7 @@ param location string
 @maxLength(15)
 param baseName string
 
-@description('Environment name (dev, test, prod)')
-@allowed(['dev', 'test', 'prod'])
+@description('Environment name (e.g., dev, test, prod, or any custom name)')
 param environmentName string = 'dev'
 
 @description('Resource group name')

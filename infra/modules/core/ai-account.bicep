@@ -52,3 +52,17 @@ output accountName string = account.name
 output accountID string = account.id
 output accountTarget string = account.properties.endpoint
 output accountPrincipalId string = account.identity.principalId
+
+// ============================================
+// Azure Verified Module (AVM) for Cognitive Services
+// ============================================
+
+// Deploy additional Cognitive Services using Microsoft's verified module
+module cognitiveServicesAVM 'br/public:avm/res/cognitive-services/account:0.14.0' = {
+  name: 'deploy-cognitive-services-${accountName}'
+  params: {
+    kind: 'CognitiveServices'
+    name: '${accountName}-cs'
+    location: location
+  }
+}

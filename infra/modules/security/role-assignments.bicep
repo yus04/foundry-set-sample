@@ -1,8 +1,5 @@
 targetScope = 'resourceGroup'
 
-@description('AI Account principal ID')
-param accountPrincipalId string
-
 @description('AI Project principal ID')
 param projectPrincipalId string
 

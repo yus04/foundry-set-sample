@@ -105,7 +105,6 @@ module dependentResources './modules/dependent-resources/dependent-resources.bic
   name: 'deploy-dependent-resources'
   params: {
     location: location
-    tags: tags
     
     // Resource names
     aiSearchName: aiSearchName
@@ -133,7 +132,6 @@ module aiAccount './modules/core/ai-account.bicep' = {
   params: {
     accountName: accountName
     location: location
-    tags: tags
     modelName: modelName
     modelFormat: modelFormat
     modelVersion: modelVersion
@@ -152,7 +150,6 @@ module aiProject './modules/core/ai-project.bicep' = {
     accountName: accountName
     projectName: projectName
     location: location
-    tags: tags
     projectDescription: projectDescription
     displayName: projectDisplayName
     
@@ -193,7 +190,6 @@ module roleAssignments './modules/security/role-assignments.bicep' = {
   name: 'assign-azure-roles'
   params: {
     // Principal IDs
-    accountPrincipalId: aiAccount.outputs.accountPrincipalId
     projectPrincipalId: aiProject.outputs.projectPrincipalId
     projectWorkspaceIdGuid: workspaceIdFormatter.outputs.projectWorkspaceIdGuid
     userPrincipalId: userPrincipalId
@@ -215,9 +211,6 @@ module roleAssignments './modules/security/role-assignments.bicep' = {
     azureStorageResourceGroupName: dependentResources.outputs.azureStorageResourceGroupName
     azureStorageSubscriptionId: dependentResources.outputs.azureStorageSubscriptionId
   }
-  dependsOn: [
-    aiProject
-  ]
 }
 
 // ============================================
@@ -229,8 +222,8 @@ module projectCapabilityHost './modules/capabilities/project-capability-host.bic
   params: {
     accountName: accountName
     projectName: projectName
-    projectCapHostName: projectCapHostName
-    accountCapHostName: accountCapHostName
+    projectCapHost: projectCapHostName
+    accountCapHost: accountCapHostName
     
     // Connection names
     cosmosDBConnection: aiProject.outputs.cosmosDBConnection

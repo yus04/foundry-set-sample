@@ -11,10 +11,15 @@
 | リソース | 目的 | 説明 |
 |---------|------|------|
 | **AI Services Account** | AIモデルホスティング | Azure OpenAI (gpt-4o) などのAIモデルを提供 |
+| **Cognitive Services** | マルチサービスAI | Decision、Language、Speech、Vision、Applied AIを統合した単一リソース |
 | **AI Project** | プロジェクト管理 | AI Agent の開発・管理プロジェクト |
 | **AI Search** | ベクトル検索 | RAG（検索拡張生成）のためのベクトル検索サービス |
 | **Storage Account** | データ保存 | Blob ストレージによるデータ永続化 |
 | **Cosmos DB** | ドキュメントDB | NoSQL データベース（会話履歴、メタデータ等） |
+
+#### Azure ポータルでのリソース一覧
+
+![リソース一覧](assets/resources.png)
 
 ### 自動設定される機能
 
@@ -103,6 +108,10 @@ azd up
 
 リソースグループは自動的に作成されます（命名: `rg-{環境名}-{baseName}`）
 
+#### 実行結果
+
+![azd up 実行結果](assets/azd-up-result.png)
+
 ### ステップ3: デプロイ確認
 
 ```bash
@@ -184,6 +193,10 @@ AI Projectのシステム割り当てマネージドIDに対して、以下の�
 - **AI Project Manager**: AI Projectの完全な管理権限（リソース作成・更新・削除、設定変更など）
 
 **重要**: `userPrincipalId` を指定しない場合、Azure Portal からAI Projectにアクセスできない可能性があります。
+
+#### 付与された AI Project Manager ロールの確認
+
+![AI Project Manager ロール](assets/ai-project-manager.png)
 
 ---
 

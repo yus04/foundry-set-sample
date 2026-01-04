@@ -82,14 +82,6 @@ module cosmosDbContainerRoles './cosmos-db-container-roles.bicep' = {
 // Storage Account Role Assignments
 // ============================================
 
-module storageAccountRole './storage-account-role.bicep' = {
-  name: 'assign-storage-account-role'
-  scope: resourceGroup(azureStorageSubscriptionId, azureStorageResourceGroupName)
-  params: {
-    azureStorageName: azureStorageName
-    projectPrincipalId: projectPrincipalId
-  }
-}
 
 module storageContainerRoles './storage-container-roles.bicep' = {
   name: 'assign-storage-container-roles'

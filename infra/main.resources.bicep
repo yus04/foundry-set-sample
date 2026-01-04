@@ -74,12 +74,35 @@ param userPrincipalId string = ''
 // Variables - Resource Naming
 // ============================================
 
-var resourcePrefix = '${baseName}-${environment}'
-var accountName = '${resourcePrefix}-aiservices'
-var projectName = '${resourcePrefix}-project'
-var aiSearchName = '${resourcePrefix}-search'
-var storageName = toLower(replace('${resourcePrefix}storage', '-', ''))
-var cosmosDbName = '${resourcePrefix}-cosmos'
+// Generate unique hash for consistent naming across all resources
+var nameHash = substring(uniqueString(resourceGroup().id, baseName, environment), 0, 6)
+
+// AI Services Account: max 64 chars, alphanumeric and hyphens
+var accountNameBase = toLower('${baseName}-${environment}')
+var accountNameTruncated = substring(accountNameBase, 0, min(length(accountNameBase), 50))
+var accountName = '${accountNameTruncated}-ai-${nameHash}'
+
+// AI Project: max 64 chars, alphanumeric and hyphens
+var projectNameBase = toLower('${baseName}-${environment}')
+var projectNameTruncated = substring(projectNameBase, 0, min(length(projectNameBase), 50))
+var projectName = '${projectNameTruncated}-prj-${nameHash}'
+
+// AI Search: max 60 chars, lowercase alphanumeric and hyphens
+var searchNameBase = toLower(replace('${baseName}${environment}', '-', ''))
+var searchNameTruncated = substring(searchNameBase, 0, min(length(searchNameBase), 47))
+var aiSearchName = '${searchNameTruncated}-srch-${nameHash}'
+
+// Storage account: max 24 chars, lowercase alphanumeric only
+var storageNameBase = toLower(replace('${baseName}${environment}', '-', ''))
+var storageNameTruncated = substring(storageNameBase, 0, min(length(storageNameBase), 18))
+var storageName = '${storageNameTruncated}${nameHash}'
+
+// Cosmos DB: max 44 chars, lowercase alphanumeric and hyphens
+var cosmosNameBase = toLower(replace('${baseName}${environment}', '-', ''))
+var cosmosNameTruncated = substring(cosmosNameBase, 0, min(length(cosmosNameBase), 31))
+var cosmosDbName = '${cosmosNameTruncated}-cosmos-${nameHash}'
+
+// Capability Host names
 var projectCapHostName = '${projectName}-caphost'
 var accountCapHostName = '${accountName}-caphost'
 

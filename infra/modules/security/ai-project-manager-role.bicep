@@ -21,10 +21,10 @@ resource project 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-previ
 }
 
 // AI Project Manager role definition (Microsoft Foundry Project Manager)
-// Role ID: d87bc03e-fc68-4e57-b076-c9caa8c2a73d
+// Role ID: eadc314b-1a2d-4efa-be10-5d325db5065e
 resource aiProjectManagerRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
   scope: resourceGroup()
-  name: 'd87bc03e-fc68-4e57-b076-c9caa8c2a73d'
+  name: 'eadc314b-1a2d-4efa-be10-5d325db5065e'
 }
 
 // Assign AI Project Manager role to user

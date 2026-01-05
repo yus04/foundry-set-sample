@@ -17,10 +17,10 @@ resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' existing = {
 }
 
 // Storage Blob Data Reader Role - Required for AI Search to read blobs for knowledge source indexing
-// Role ID: 2a2b9908-6b9a-4582-a4c1-7e3c5d6ca4c3
+// Role ID: 2a2b9908-6ea1-4ae2-8e65-a410df84e7d1
 resource storageBlobDataReaderRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
   scope: resourceGroup()
-  name: '2a2b9908-6b9a-4582-a4c1-7e3c5d6ca4c3'
+  name: '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
 }
 
 // Assign Storage Blob Data Reader role to AI Search managed identity

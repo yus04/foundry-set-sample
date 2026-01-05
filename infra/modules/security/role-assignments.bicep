@@ -82,7 +82,7 @@ module cosmosDbContainerRoles './cosmos-db-container-roles.bicep' = {
 // Storage Account Role Assignments
 // ============================================
 
-
+// Assign storage roles to AI Project (managed identity)
 module storageContainerRoles './storage-container-roles.bicep' = {
   name: 'assign-storage-container-roles'
   scope: resourceGroup(azureStorageSubscriptionId, azureStorageResourceGroupName)
@@ -90,6 +90,16 @@ module storageContainerRoles './storage-container-roles.bicep' = {
     storageName: azureStorageName
     aiProjectPrincipalId: projectPrincipalId
     workspaceId: projectWorkspaceIdGuid
+  }
+}
+
+// Assign storage roles to User for file upload and knowledge source operations
+module storageUserRoles './storage-user-roles.bicep' = if (userPrincipalId != '') {
+  name: 'assign-storage-user-roles'
+  scope: resourceGroup(azureStorageSubscriptionId, azureStorageResourceGroupName)
+  params: {
+    userPrincipalId: userPrincipalId
+    storageName: azureStorageName
   }
 }
 

@@ -28,6 +28,31 @@
 ✅ **Agent Service設定**: AI Agentの実行環境を自動構成  
 ✅ **リソース接続**: AI Project と依存リソース間の接続を自動作成
 
+### 🔐 ロール構成の全体像（最小権限の原則）
+
+すべてのロール割り当ては**リソース単位のスコープ**で付与され、最小権限の原則に従っています。
+
+#### AI Project（マネージドID）のロール
+
+| リソース | ロール | スコープ | 目的 |
+|---------|-------|---------|------|
+| **Storage Account** | Storage Blob Data Owner | リソース単位 | Blob の完全アクセス（Agent 実行時のデータ操作） |
+| **AI Search** | Search Index Data Contributor | リソース単位 | インデックスへの書き込み（RAG用） |
+| **AI Search** | Search Service Contributor | リソース単位 | 検索サービスの管理 |
+| **Cosmos DB** | Cosmos DB Account Reader Role | リソース単位 | アカウント情報の読み取り |
+| **Cosmos DB** | Cosmos DB Built-in Data Contributor | データベース単位 | ドキュメントの読み書き（会話履歴） |
+
+#### ユーザーのロール（USER_PRINCIPAL_IDで指定）
+
+| リソース | ロール | スコープ | 目的 |
+|---------|-------|---------|------|
+| **AI Project** | AI Project Manager | プロジェクト単位 | プロジェクトの管理・設定 |
+| **AI Services Account** | Cognitive Services OpenAI Contributor | アカウント単位 | Azure OpenAI操作・データ生成ジョブの実行 |
+| **Storage Account** | Storage Blob Data Contributor | リソース単位 | ファイルのアップロード・ナレッジソース設定 |
+| **Storage Account** | Storage Account Contributor | リソース単位 | ストレージアカウント情報の読み取り |
+
+> **セキュリティノート**: リソースグループスコープは一切使用せず、すべてリソース単位またはデータベース/プロジェクト単位のスコープでロールを付与しています。
+
 ---
 
 ## 🎯 デプロイ前の準備

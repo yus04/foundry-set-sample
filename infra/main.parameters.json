@@ -14,6 +14,13 @@
     "resourceGroupName": {
       "value": "${AZURE_RESOURCE_GROUP=}"
     },
+    "tags": {
+      "value": {
+        "environment": "${AZURE_ENV_NAME}",
+        "managedBy": "azd",
+        "project": "azure-ai-foundry"
+      }
+    },
     "modelName": {
       "value": "gpt-4o"
     },

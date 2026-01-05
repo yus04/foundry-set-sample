@@ -109,6 +109,29 @@ azd env set MODEL_CAPACITY 200                # モデルキャパシティ（�
 azd env set PROJECT_DISPLAY_NAME "My AI Project"  # プロジェクト表示名
 ```
 
+#### タグの設定（オプション）
+
+リソースグループおよび全リソースに対してカスタムタグを設定する場合：
+
+```bash
+# デフォルトタグ（設定済み）:
+# - environment: dev (または指定した環境名)
+# - managedBy: azd
+# - project: azure-ai-foundry
+
+# カスタムタグを追加する場合（JSON形式）
+azd env set TAGS '{
+  "environment": "dev",
+  "managedBy": "azd", 
+  "project": "azure-ai-foundry",
+  "costCenter": "12345",
+  "owner": "myteam",
+  "department": "engineering"
+}'
+```
+
+> **注意**: JSON形式で指定する際は、既存のデフォルトタグも含めて完全なオブジェクトとして記述してください。
+
 #### 方法B: infra/main.parameters.json で設定
 
 `infra/main.parameters.json` を直接編集：
@@ -121,6 +144,16 @@ azd env set PROJECT_DISPLAY_NAME "My AI Project"  # プロジェクト表示名
     },
     "modelCapacity": {
       "value": 200
+    },
+    "tags": {
+      "value": {
+        "environment": "dev",
+        "managedBy": "azd",
+        "project": "azure-ai-foundry",
+        "costCenter": "12345",
+        "owner": "myteam",
+        "department": "engineering"
+      }
     }
   }
 }

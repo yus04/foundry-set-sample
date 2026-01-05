@@ -46,6 +46,7 @@ param azureStorageSubscriptionId string
 // AI Search Role Assignments
 // ============================================
 
+// Assign AI Search roles to AI Project (for search operations)
 module aiSearchRoles './ai-search-roles.bicep' = {
   name: 'assign-ai-search-roles'
   scope: resourceGroup(aiSearchServiceSubscriptionId, aiSearchServiceResourceGroupName)
@@ -53,6 +54,20 @@ module aiSearchRoles './ai-search-roles.bicep' = {
     aiSearchName: aiSearchName
     projectPrincipalId: projectPrincipalId
   }
+}
+
+// Assign Storage Blob Data Reader role to AI Search managed identity
+// This is required for AI Search to access blob storage when creating knowledge source indexes
+module aiSearchStorageRoles './ai-search-storage-roles.bicep' = {
+  name: 'assign-ai-search-storage-roles'
+  scope: resourceGroup(azureStorageSubscriptionId, azureStorageResourceGroupName)
+  params: {
+    aiSearchName: aiSearchName
+    storageName: azureStorageName
+  }
+  dependsOn: [
+    aiSearchRoles
+  ]
 }
 
 // ============================================

@@ -42,6 +42,12 @@
 | **Cosmos DB** | Cosmos DB Account Reader Role | リソース単位 | アカウント情報の読み取り |
 | **Cosmos DB** | Cosmos DB Built-in Data Contributor | データベース単位 | ドキュメントの読み書き（会話履歴） |
 
+#### AI Search（マネージドID）のロール
+
+| リソース | ロール | スコープ | 目的 |
+|---------|-------|---------|------|
+| **Storage Account** | Storage Blob Data Reader | リソース単位 | Blob コンテナの読み取り（ナレッジソースのインデックス作成） |
+
 #### ユーザーのロール（USER_PRINCIPAL_IDで指定）
 
 | リソース | ロール | スコープ | 目的 |

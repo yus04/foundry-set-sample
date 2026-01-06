@@ -35,10 +35,11 @@ resource cognitiveServicesOpenAIContributorRole 'Microsoft.Authorization/roleDef
   name: 'a001fd3d-188f-4b5d-821b-7da978bf7442'
 }
 
-// Assign AI Project Manager role to user on Project scope
-resource aiProjectManagerAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (userPrincipalId != '') {
-  scope: project
-  name: guid(userPrincipalId, aiProjectManagerRole.id, project.id)
+// Assign AI Project Manager role to user on AI Services Account scope
+// This allows management of all projects within the account
+resource aiProjectManagerAccountAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (userPrincipalId != '') {
+  scope: account
+  name: guid(userPrincipalId, aiProjectManagerRole.id, account.id)
   properties: {
     principalId: userPrincipalId
     roleDefinitionId: aiProjectManagerRole.id
@@ -58,7 +59,7 @@ resource openAIContributorAssignment 'Microsoft.Authorization/roleAssignments@20
   }
 }
 
-output projectManagerRoleAssignmentId string = aiProjectManagerAssignment.id
-output projectManagerRoleAssignmentName string = aiProjectManagerAssignment.name
+output accountManagerRoleAssignmentId string = aiProjectManagerAccountAssignment.id
+output accountManagerRoleAssignmentName string = aiProjectManagerAccountAssignment.name
 output openAIContributorRoleAssignmentId string = openAIContributorAssignment.id
 output openAIContributorRoleAssignmentName string = openAIContributorAssignment.name

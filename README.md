@@ -52,7 +52,7 @@
 
 | リソース | ロール | スコープ | 目的 |
 |---------|-------|---------|------|
-| **AI Project** | AI Project Manager | プロジェクト単位 | プロジェクトの管理・設定 |
+| **AI Services Account** | AI Project Manager | アカウント単位 | アカウント内の全プロジェクトの管理・新規プロジェクト作成 |
 | **AI Services Account** | Cognitive Services OpenAI Contributor | アカウント単位 | Azure OpenAI操作・データ生成ジョブの実行 |
 | **Storage Account** | Storage Blob Data Contributor | リソース単位 | ファイルのアップロード・ナレッジソース設定 |
 | **Storage Account** | Storage Account Contributor | リソース単位 | ストレージアカウント情報の読み取り |

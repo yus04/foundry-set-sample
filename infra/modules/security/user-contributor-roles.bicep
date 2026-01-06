@@ -50,32 +50,16 @@ resource cognitiveServices 'Microsoft.CognitiveServices/accounts@2025-04-01-prev
   name: cognitiveServicesName
 }
 
-// Reference existing AI Project
-resource project 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-preview' existing = {
-  parent: account
-  name: projectName
-}
-
 // Reference existing Storage Account
 resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' existing = {
   name: storageName
 }
 
 // Assign Contributor role to group on AI Services Account
+// Note: AI Project inherits permissions from AI Services Account scope, so no separate assignment needed
 resource contributorAccountAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (userPrincipalId != '') {
   scope: account
   name: guid(userPrincipalId, contributorRole.id, account.id, 'contributor')
-  properties: {
-    principalId: userPrincipalId
-    roleDefinitionId: contributorRole.id
-    principalType: 'Group'
-  }
-}
-
-// Assign Contributor role to group on AI Project
-resource contributorProjectAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (userPrincipalId != '') {
-  scope: project
-  name: guid(userPrincipalId, contributorRole.id, project.id, 'contributor')
   properties: {
     principalId: userPrincipalId
     roleDefinitionId: contributorRole.id
@@ -128,6 +112,5 @@ module contributorCosmosDbAssignment './cross-rg-contributor-assignment.bicep' =
 }
 
 output contributorAccountAssignmentId string = contributorAccountAssignment.id
-output contributorProjectAssignmentId string = contributorProjectAssignment.id
 output contributorStorageAssignmentId string = contributorStorageAssignment.id
 output contributorCognitiveServicesAssignmentId string = contributorCognitiveServicesAssignment.id

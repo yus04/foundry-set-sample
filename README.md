@@ -53,16 +53,20 @@
 | リソース | ロール | スコープ | 目的 |
 |---------|-------|---------|------|
 | **リソースグループ** | Reader | リソースグループ単位 | リソースグループ内の全リソースの閲覧権限 |
-| **全リソース** | Contributor | 各リソース単位 | すべてのAzureリソースの完全な管理権限 |
+| **AI Services Account** | Contributor | アカウント単位 | AI Services Account と配下の全 AI Project の完全な管理権限 |
 | **AI Services Account** | AI Project Manager | アカウント単位 | アカウント内の全プロジェクトの管理・新規プロジェクト作成 |
 | **AI Services Account** | Cognitive Services OpenAI Contributor | アカウント単位 | Azure OpenAI操作・データ生成ジョブの実行 |
 | **Cognitive Services** | Contributor | リソース単位 | Cognitive Services マルチサービスアカウントの完全な管理権限 |
+| **Storage Account** | Contributor | リソース単位 | Storage Account の完全な管理権限 |
 | **Storage Account** | Storage Blob Data Contributor | リソース単位 | ファイルのアップロード・ナレッジソース設定 |
 | **Storage Account** | Storage Account Contributor | リソース単位 | ストレージアカウント情報の読み取り |
+| **AI Search** | Contributor | リソース単位 | AI Search の完全な管理権限 |
+| **Cosmos DB** | Contributor | リソース単位 | Cosmos DB の完全な管理権限 |
 
 > **セキュリティノート**: 
-> - すべてのリソースに対してContributorロールを付与することで、ユーザーはリソースの設定変更、削除、管理を含む完全な操作が可能です
-> - リソースグループスコープは一切使用せず、すべてリソース単位またはデータベース/プロジェクト単位のスコープでロールを付与しています
+> - AI Services Account に Contributor ロールを付与することで、配下の全 AI Project も自動的に管理可能になります（階層的な権限継承）
+> - リソースグループスコープではなく、各リソース単位でロールを付与することで、最小権限の原則に従っています
+> - すべてのリソース（AI Services Account、Cognitive Services、Storage Account、AI Search、Cosmos DB）に対して個別に Contributor ロールが付与されます
 
 ---
 

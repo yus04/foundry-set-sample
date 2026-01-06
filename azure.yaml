@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: foundry-setup
+metadata:
+  template: foundry-setup@0.0.1-beta
+
+# プロジェクトの説明
+services: {}
+
+# インフラストラクチャの定義
+infra:
+  provider: bicep
+  path: infra
+  module: main
+
+# デプロイ時のフック（必要に応じて追加可能）
+hooks:
+  postprovision:
+    shell: sh
+    run: echo "✅ Microsoft Foundry のデプロイが完了しました！"
+    continueOnError: false
+    interactive: true

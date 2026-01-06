@@ -1,0 +1,55 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "${AZURE_LOCATION=eastus}"
+    },
+    "baseName": {
+      "value": "${AZURE_ENV_NAME}"
+    },
+    "resourceGroupName": {
+      "value": "${AZURE_RESOURCE_GROUP=}"
+    },
+    "tags": {
+      "value": {
+        "environment": "${AZURE_ENV_NAME}",
+        "managedBy": "azd",
+        "project": "azure-ai-foundry"
+      }
+    },
+    "modelName": {
+      "value": "gpt-4o"
+    },
+    "modelFormat": {
+      "value": "OpenAI"
+    },
+    "modelVersion": {
+      "value": "2024-08-06"
+    },
+    "modelSkuName": {
+      "value": "GlobalStandard"
+    },
+    "modelCapacity": {
+      "value": 100
+    },
+    "projectDisplayName": {
+      "value": "AI Agent Project"
+    },
+    "projectDescription": {
+      "value": "Microsoft Foundry project for building AI agents"
+    },
+    "userPrincipalId": {
+      "value": "${USER_PRINCIPAL_ID=}"
+    },
+    "existingAiSearchResourceId": {
+      "value": ""
+    },
+    "existingStorageAccountResourceId": {
+      "value": ""
+    },
+    "existingCosmosDbAccountResourceId": {
+      "value": ""
+    }
+  }
+}

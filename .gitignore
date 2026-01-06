@@ -1,0 +1,23 @@
+# Azure Developer CLI
+.azure/
+!.azure/config.json
+
+# Bicep
+*.bicep.json
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Environment files
+.env
+.env.local
+
+# Build outputs
+dist/
+build/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -48,16 +48,19 @@
 |---------|-------|---------|------|
 | **Storage Account** | Storage Blob Data Reader | リソース単位 | Blob コンテナの読み取り（ナレッジソースのインデックス作成） |
 
-#### ユーザーのロール（USER_PRINCIPAL_IDで指定）
+#### グループメンバーのロール（USER_PRINCIPAL_IDで指定したグループに所属するユーザー）
 
 | リソース | ロール | スコープ | 目的 |
 |---------|-------|---------|------|
+| **全リソース** | Contributor | 各リソース単位 | すべてのAzureリソースの完全な管理権限 |
 | **AI Services Account** | AI Project Manager | アカウント単位 | アカウント内の全プロジェクトの管理・新規プロジェクト作成 |
 | **AI Services Account** | Cognitive Services OpenAI Contributor | アカウント単位 | Azure OpenAI操作・データ生成ジョブの実行 |
 | **Storage Account** | Storage Blob Data Contributor | リソース単位 | ファイルのアップロード・ナレッジソース設定 |
 | **Storage Account** | Storage Account Contributor | リソース単位 | ストレージアカウント情報の読み取り |
 
-> **セキュリティノート**: リソースグループスコープは一切使用せず、すべてリソース単位またはデータベース/プロジェクト単位のスコープでロールを付与しています。
+> **セキュリティノート**: 
+> - すべてのリソースに対してContributorロールを付与することで、ユーザーはリソースの設定変更、削除、管理を含む完全な操作が可能です
+> - リソースグループスコープは一切使用せず、すべてリソース単位またはデータベース/プロジェクト単位のスコープでロールを付与しています
 
 ---
 
@@ -71,19 +74,27 @@
   - **Contributor** (リソース作成用)
   - **Role Based Access Control Administrator** (ロール割り当て用)
 
-### 2. ユーザープリンシパルIDの取得（重要）
+### 2. セキュリティグループIDの取得（重要）
 
-AI Project Manager ロールを自分に付与するため、あなたのユーザープリンシパルID（オブジェクトID）を取得します (別ユーザーに付与する場合には、代わりに該当ユーザーのプリンシパルIDを取得すること)：
+AI Project Manager ロールをグループに付与するため、Microsoft Entra ID セキュリティグループのオブジェクトIDを取得します：
 
 ```bash
 # Azure にログイン
 az login
 
-# あなたのオブジェクトIDを取得
-az ad signed-in-user show --query id -o tsv
+# グループのオブジェクトIDを取得（グループ名で検索）
+az ad group show --group "AI Engineers" --query id -o tsv
+
+# または、グループ一覧から探す
+az ad group list --query "[?displayName=='AI Engineers'].{Name:displayName, ObjectId:id}" -o table
 ```
 
 このIDをメモしておいてください（後で使用します）。
+
+> **グループベース管理のメリット**：
+> - グループに追加されたメンバーは自動的に権限を取得
+> - グループから削除されたメンバーは自動的に権限を失う
+> - 個別のユーザーごとにロール割り当てを管理する必要がない
 
 ---
 
@@ -102,7 +113,7 @@ azd init
 
 # 必須パラメータの設定
 azd env set AZURE_LOCATION japaneast          # デプロイリージョン
-azd env set USER_PRINCIPAL_ID <YOUR_OBJECT_ID>  # 上記で取得したオブジェクトID
+azd env set USER_PRINCIPAL_ID <GROUP_OBJECT_ID>  # 上記で取得したグループのオブジェクトID
 
 # オプション: カスタマイズしたい場合
 azd env set MODEL_CAPACITY 200                # モデルキャパシティ（デフォルト: 100）
@@ -142,7 +153,7 @@ azd env set TAGS '{
 {
   "parameters": {
     "userPrincipalId": {
-      "value": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  // あなたのオブジェクトID
+      "value": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  // グループのオブジェクトID
     },
     "modelCapacity": {
       "value": 200
@@ -200,7 +211,7 @@ azd env get-values | grep aiAccountEndpoint
 | パラメータ | 設定方法 | 説明 | 例 |
 |-----------|---------|------|---|
 | `AZURE_LOCATION` | 環境変数 | デプロイリージョン | `japaneast`, `eastus` |
-| `USER_PRINCIPAL_ID` | 環境変数 or JSON | ユーザーのオブジェクトID（AI Project Manager ロール付与対象） | `12345678-1234-...` |
+| `USER_PRINCIPAL_ID` | 環境変数 or JSON | セキュリティグループのオブジェクトID（AI Project Manager ロール付与対象） | `12345678-1234-...` |
 
 ### オプションパラメータ（カスタマイズ可能）
 
@@ -252,13 +263,17 @@ AI Projectのシステム割り当てマネージドIDに対して、以下の�
 - **Storage Account Contributor**: アカウント管理権限
 - **Storage Blob Data Contributor**: Blobデータの読み書き権限
 
-### ユーザーに付与されるロール
+### グループメンバーに付与されるロール
 
-`userPrincipalId` で指定したユーザーに対して：
+`userPrincipalId` で指定したセキュリティグループに所属するすべてのメンバーに対して：
 
 - **AI Project Manager**: AI Projectの完全な管理権限（リソース作成・更新・削除、設定変更など）
+- **Contributor**: すべてのAzureリソースの完全な管理権限
+- **Cognitive Services OpenAI Contributor**: Azure OpenAI操作・データ生成ジョブの実行
+- **Storage Blob Data Contributor**: ファイルのアップロード・ナレッジソース設定
+- **Storage Account Contributor**: ストレージアカウント情報の読み取り
 
-**重要**: `userPrincipalId` を指定しない場合、Azure Portal からAI Projectにアクセスできない可能性があります。
+**重要**: `userPrincipalId` を指定しない場合、Azure Portal からAI Projectにアクセスできない可能性があります。グループに所属するメンバーは、グループから削除されると自動的に権限を失い、追加されると自動的に権限を取得します。
 
 #### 付与された AI Project Manager ロールの確認
 
@@ -337,14 +352,22 @@ azd down --force --purge
 
 **A**: いいえ、省略可能ですが、**強く推奨**します。指定しない場合、Azure Portal から AI Project にアクセスして管理操作を行うことができません。Agent の実行自体は可能ですが、プロジェクトの設定変更やリソース管理ができなくなります。
 
-### Q2: オブジェクトIDはどこで確認できますか？
+### Q2: グループのオブジェクトIDはどこで確認できますか？
 
 **A**: 以下のコマンドで取得できます：
 ```bash
-az ad signed-in-user show --query id -o tsv
+# グループ名で検索
+az ad group show --group "AI Engineers" --query id -o tsv
+
+# またはグループ一覧から探す
+az ad group list --query "[?displayName=='AI Engineers'].{Name:displayName, ObjectId:id}" -o table
 ```
 
-または、Azure Portal > Microsoft Entra ID > ユーザー > 自分のプロフィール > オブジェクトID
+または、Azure Portal > Microsoft Entra ID > グループ > 対象グループ > オブジェクトID
+
+### Q2.1: 個別のユーザーに権限を付与したい場合は？
+
+**A**: グループを使用せず個別ユーザーに付与する場合は、Bicep ファイルで `principalType: 'Group'` を `principalType: 'User'` に変更してください。ただし、グループベースの管理が推奨されます（メンバーシップの変更だけで権限制御が可能）。
 
 ### Q3: 既存のAI Search/Storage/Cosmos DB を使いたい
 

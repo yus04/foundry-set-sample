@@ -25,25 +25,25 @@ resource storageAccountContributorRole 'Microsoft.Authorization/roleDefinitions@
   name: '17d1049b-9a84-46fb-8f53-869881c3d3ab'
 }
 
-// Assign Storage Blob Data Contributor role to user for blob operations
+// Assign Storage Blob Data Contributor role to group for blob operations
 resource blobDataContributorAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (userPrincipalId != '') {
   scope: storage
   name: guid(userPrincipalId, storageBlobDataContributorRole.id, storage.id)
   properties: {
     principalId: userPrincipalId
     roleDefinitionId: storageBlobDataContributorRole.id
-    principalType: 'User'
+    principalType: 'Group'
   }
 }
 
-// Assign Storage Account Contributor role to user for account-level operations
+// Assign Storage Account Contributor role to group for account-level operations
 resource storageAccountContributorAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (userPrincipalId != '') {
   scope: storage
   name: guid(userPrincipalId, storageAccountContributorRole.id, storage.id)
   properties: {
     principalId: userPrincipalId
     roleDefinitionId: storageAccountContributorRole.id
-    principalType: 'User'
+    principalType: 'Group'
   }
 }
 

@@ -130,3 +130,24 @@ module aiProjectManagerRole './ai-project-manager-role.bicep' = if (userPrincipa
     projectName: projectName
   }
 }
+
+// ============================================
+// Contributor Role Assignment (User)
+// ============================================
+
+// Assign Contributor role to user on all Azure resources
+module userContributorRoles './user-contributor-roles.bicep' = if (userPrincipalId != '') {
+  name: 'assign-user-contributor-roles'
+  params: {
+    userPrincipalId: userPrincipalId
+    accountName: accountName
+    projectName: projectName
+    storageName: azureStorageName
+    aiSearchName: aiSearchName
+    aiSearchResourceGroupName: aiSearchServiceResourceGroupName
+    aiSearchSubscriptionId: aiSearchServiceSubscriptionId
+    cosmosDBName: cosmosDBName
+    cosmosDBResourceGroupName: cosmosDBResourceGroupName
+    cosmosDBSubscriptionId: cosmosDBSubscriptionId
+  }
+}

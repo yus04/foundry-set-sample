@@ -42,6 +42,9 @@ param azureStorageResourceGroupName string
 @description('Storage subscription ID')
 param azureStorageSubscriptionId string
 
+@description('Cognitive Services account name')
+param cognitiveServicesName string
+
 // ============================================
 // AI Search Role Assignments
 // ============================================
@@ -143,11 +146,24 @@ module userContributorRoles './user-contributor-roles.bicep' = if (userPrincipal
     accountName: accountName
     projectName: projectName
     storageName: azureStorageName
+    cognitiveServicesName: cognitiveServicesName
     aiSearchName: aiSearchName
     aiSearchResourceGroupName: aiSearchServiceResourceGroupName
     aiSearchSubscriptionId: aiSearchServiceSubscriptionId
     cosmosDBName: cosmosDBName
     cosmosDBResourceGroupName: cosmosDBResourceGroupName
     cosmosDBSubscriptionId: cosmosDBSubscriptionId
+  }
+}
+
+// ============================================
+// Resource Group Reader Role Assignment
+// ============================================
+
+// Assign Reader role to group on Resource Group
+module resourceGroupReaderRole './resource-group-reader-role.bicep' = if (userPrincipalId != '') {
+  name: 'assign-resource-group-reader-role'
+  params: {
+    userPrincipalId: userPrincipalId
   }
 }

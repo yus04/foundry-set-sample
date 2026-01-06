@@ -52,9 +52,11 @@
 
 | リソース | ロール | スコープ | 目的 |
 |---------|-------|---------|------|
+| **リソースグループ** | Reader | リソースグループ単位 | リソースグループ内の全リソースの閲覧権限 |
 | **全リソース** | Contributor | 各リソース単位 | すべてのAzureリソースの完全な管理権限 |
 | **AI Services Account** | AI Project Manager | アカウント単位 | アカウント内の全プロジェクトの管理・新規プロジェクト作成 |
 | **AI Services Account** | Cognitive Services OpenAI Contributor | アカウント単位 | Azure OpenAI操作・データ生成ジョブの実行 |
+| **Cognitive Services** | Contributor | リソース単位 | Cognitive Services マルチサービスアカウントの完全な管理権限 |
 | **Storage Account** | Storage Blob Data Contributor | リソース単位 | ファイルのアップロード・ナレッジソース設定 |
 | **Storage Account** | Storage Account Contributor | リソース単位 | ストレージアカウント情報の読み取り |
 
@@ -267,8 +269,9 @@ AI Projectのシステム割り当てマネージドIDに対して、以下の�
 
 `userPrincipalId` で指定したセキュリティグループに所属するすべてのメンバーに対して：
 
-- **AI Project Manager**: AI Projectの完全な管理権限（リソース作成・更新・削除、設定変更など）
-- **Contributor**: すべてのAzureリソースの完全な管理権限
+- **Reader (リソースグループ)**: リソースグループ内の全リソースの閲覧権限
+- **Contributor (全リソース)**: すべてのAzureリソース(AI Services Account、AI Project、Cognitive Services、Storage Account、AI Search、Cosmos DB)の完全な管理権限
+- **AI Project Manager**: AI Projectの完全な管理権限(リソース作成・更新・削除、設定変更など)
 - **Cognitive Services OpenAI Contributor**: Azure OpenAI操作・データ生成ジョブの実行
 - **Storage Blob Data Contributor**: ファイルのアップロード・ナレッジソース設定
 - **Storage Account Contributor**: ストレージアカウント情報の読み取り

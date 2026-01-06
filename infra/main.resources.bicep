@@ -218,6 +218,7 @@ module roleAssignments './modules/security/role-assignments.bicep' = {
     
     // Account and Project names for AI Project Manager role
     accountName: accountName
+    cognitiveServicesName: cognitiveServicesName
     projectName: projectName
     
     // Resource names

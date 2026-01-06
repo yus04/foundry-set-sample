@@ -30,6 +30,9 @@ param cosmosDBResourceGroupName string
 @description('Cosmos DB subscription ID')
 param cosmosDBSubscriptionId string
 
+@description('Cognitive Services account name')
+param cognitiveServicesName string
+
 // Contributor role definition
 // Role ID: b24988ac-6180-42a0-ab88-20f7382dd24c
 resource contributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
@@ -40,6 +43,11 @@ resource contributorRole 'Microsoft.Authorization/roleDefinitions@2022-04-01' ex
 // Reference existing AI Services account
 resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = {
   name: accountName
+}
+
+// Reference existing Cognitive Services account (AVM)
+resource cognitiveServices 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' existing = {
+  name: cognitiveServicesName
 }
 
 // Reference existing AI Project
@@ -86,6 +94,17 @@ resource contributorStorageAssignment 'Microsoft.Authorization/roleAssignments@2
   }
 }
 
+// Assign Contributor role to group on Cognitive Services Account
+resource contributorCognitiveServicesAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (userPrincipalId != '') {
+  scope: cognitiveServices
+  name: guid(userPrincipalId, contributorRole.id, cognitiveServices.id, 'contributor')
+  properties: {
+    principalId: userPrincipalId
+    roleDefinitionId: contributorRole.id
+    principalType: 'Group'
+  }
+}
+
 // Assign Contributor role to user on AI Search (cross-resource-group)
 module contributorAiSearchAssignment './cross-rg-contributor-assignment.bicep' = if (userPrincipalId != '') {
   name: 'assign-contributor-ai-search'
@@ -111,3 +130,4 @@ module contributorCosmosDbAssignment './cross-rg-contributor-assignment.bicep' =
 output contributorAccountAssignmentId string = contributorAccountAssignment.id
 output contributorProjectAssignmentId string = contributorProjectAssignment.id
 output contributorStorageAssignmentId string = contributorStorageAssignment.id
+output contributorCognitiveServicesAssignmentId string = contributorCognitiveServicesAssignment.id

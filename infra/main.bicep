@@ -12,15 +12,12 @@ param location string
 @maxLength(15)
 param baseName string
 
-@description('Environment name (e.g., dev, test, prod, or any custom name)')
-param environmentName string = 'dev'
-
 @description('Resource group name')
-param resourceGroupName string = 'rg-${baseName}-${environmentName}'
+param resourceGroupName string = 'rg-${baseName}'
 
 @description('Tags to apply to all resources')
 param tags object = {
-  environment: environmentName
+  environment: baseName
   managedBy: 'azd'
   project: 'azure-ai-foundry'
 }
@@ -93,7 +90,6 @@ module resources './main.resources.bicep' = {
   params: {
     location: location
     baseName: baseName
-    environment: environmentName
     tags: tags
     modelName: modelName
     modelFormat: modelFormat

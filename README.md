@@ -109,19 +109,21 @@ azd env set MODEL_CAPACITY 200                # モデルキャパシティ（�
 azd env set PROJECT_DISPLAY_NAME "My AI Project"  # プロジェクト表示名
 ```
 
+> **注意**: `azd init`で指定する環境名（例: `foundry-demo`）が、すべてのリソース名のベースになります。リソースグループは`rg-{環境名}`、各リソースは`{環境名}-{リソースタイプ}-{ハッシュ}`の形式で作成されます。
+
 #### タグの設定（オプション）
 
 リソースグループおよび全リソースに対してカスタムタグを設定する場合：
 
 ```bash
 # デフォルトタグ（設定済み）:
-# - environment: dev (または指定した環境名)
+# - environment: {azd環境名}
 # - managedBy: azd
 # - project: azure-ai-foundry
 
 # カスタムタグを追加する場合（JSON形式）
 azd env set TAGS '{
-  "environment": "dev",
+  "environment": "production",
   "managedBy": "azd", 
   "project": "azure-ai-foundry",
   "costCenter": "12345",
@@ -147,7 +149,7 @@ azd env set TAGS '{
     },
     "tags": {
       "value": {
-        "environment": "dev",
+        "environment": "production",
         "managedBy": "azd",
         "project": "azure-ai-foundry",
         "costCenter": "12345",

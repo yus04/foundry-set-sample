@@ -12,12 +12,9 @@ param location string = resourceGroup().location
 @maxLength(15)
 param baseName string
 
-@description('Environment name (e.g., dev, test, prod, or any custom name)')
-param environment string = 'dev'
-
 @description('Tags to apply to all resources')
 param tags object = {
-  environment: environment
+  environment: baseName
   managedBy: 'bicep'
   project: 'azure-ai-foundry'
 }

@@ -23,6 +23,9 @@ param vnetId string
 @description('Subnet resource ID for private endpoint')
 param subnetId string
 
+@description('Blob Private DNS Zone resource ID (shared with private-endpoints module)')
+param blobDnsZoneId string
+
 // ============================================
 // AMPLS Resource
 // ============================================
@@ -107,12 +110,38 @@ resource amplsDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGro
   parent: amplsPrivateEndpoint
   name: 'default'
   properties: {
-    privateDnsZoneConfigs: [for (zoneName, i) in amplsDnsZoneNames: {
-      name: replace(zoneName, '.', '-')
-      properties: {
-        privateDnsZoneId: amplsDnsZones[i].id
+    privateDnsZoneConfigs: [
+      {
+        name: 'privatelink-monitor-azure-com'
+        properties: {
+          privateDnsZoneId: amplsDnsZones[0].id
+        }
       }
-    }]
+      {
+        name: 'privatelink-oms-opinsights-azure-com'
+        properties: {
+          privateDnsZoneId: amplsDnsZones[1].id
+        }
+      }
+      {
+        name: 'privatelink-ods-opinsights-azure-com'
+        properties: {
+          privateDnsZoneId: amplsDnsZones[2].id
+        }
+      }
+      {
+        name: 'privatelink-agentsvc-azure-automation-net'
+        properties: {
+          privateDnsZoneId: amplsDnsZones[3].id
+        }
+      }
+      {
+        name: 'privatelink-blob'
+        properties: {
+          privateDnsZoneId: blobDnsZoneId
+        }
+      }
+    ]
   }
 }
 

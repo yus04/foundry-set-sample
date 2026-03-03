@@ -136,3 +136,10 @@ resource dnsZoneGroups 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@
     ]
   }
 }]
+
+// ============================================
+// Outputs
+// ============================================
+
+@description('Blob Private DNS Zone resource ID (shared with AMPLS)')
+output blobDnsZoneId string = privateDnsZones[0].id

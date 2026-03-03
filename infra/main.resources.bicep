@@ -244,6 +244,7 @@ module ampls './modules/monitoring/ampls.bicep' = {
     logAnalyticsName: logAnalytics.outputs.logAnalyticsName
     vnetId: vnet.outputs.vnetId
     subnetId: vnet.outputs.privateEndpointSubnetId
+    blobDnsZoneId: privateEndpoints.outputs.blobDnsZoneId
   }
 }
 

@@ -397,6 +397,9 @@ module diagnosticSettings './modules/monitoring/diagnostic-settings.bicep' = {
     aiAccountName: accountName
     logAnalyticsId: logAnalytics.outputs.logAnalyticsId
   }
+  dependsOn: [
+    aiAccount
+  ]
 }
 
 // ============================================

@@ -71,6 +71,16 @@ param projectDescription string = 'Microsoft Foundry project for building AI age
 param userPrincipalId string = ''
 
 // ============================================
+// Parameters - Enterprise Networking
+// ============================================
+
+@description('Publisher email for API Management')
+param apimPublisherEmail string = 'admin@contoso.com'
+
+@description('Publisher name for API Management')
+param apimPublisherName string = 'AI Platform Team'
+
+// ============================================
 // Resource Group
 // ============================================
 
@@ -102,6 +112,8 @@ module resources './main.resources.bicep' = {
     projectDisplayName: projectDisplayName
     projectDescription: projectDescription
     userPrincipalId: userPrincipalId
+    apimPublisherEmail: apimPublisherEmail
+    apimPublisherName: apimPublisherName
   }
 }
 
@@ -135,6 +147,18 @@ output cosmosDbAccountName string = resources.outputs.cosmosDbAccountName
 
 @description('Deployment completed successfully')
 output deploymentStatus string = resources.outputs.deploymentStatus
+
+@description('Virtual Network name')
+output vnetName string = resources.outputs.vnetName
+
+@description('Log Analytics workspace name')
+output logAnalyticsName string = resources.outputs.logAnalyticsName
+
+@description('API Management name')
+output apimName string = resources.outputs.apimName
+
+@description('API Management gateway URL')
+output apimGatewayUrl string = resources.outputs.apimGatewayUrl
 
 @description('Azure Portal URL for the project')
 output azurePortalUrl string = 'https://portal.azure.com/#@/resource${rg.id}'

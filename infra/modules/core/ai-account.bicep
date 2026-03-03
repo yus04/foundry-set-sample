@@ -21,11 +21,11 @@ resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
     allowProjectManagement: true
     customSubDomainName: accountName
     networkAcls: {
-      defaultAction: 'Allow'
+      defaultAction: 'Deny'
       virtualNetworkRules: []
       ipRules: []
     }
-    publicNetworkAccess: 'Enabled'
+    publicNetworkAccess: 'Disabled'
 
     // API-key based auth is not supported for the Agent service
     disableLocalAuth: false

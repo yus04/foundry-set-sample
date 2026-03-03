@@ -50,6 +50,12 @@
     },
     "existingCosmosDbAccountResourceId": {
       "value": ""
+    },
+    "apimPublisherEmail": {
+      "value": "${APIM_PUBLISHER_EMAIL=admin@contoso.com}"
+    },
+    "apimPublisherName": {
+      "value": "${APIM_PUBLISHER_NAME=AI Platform Team}"
     }
   }
 }

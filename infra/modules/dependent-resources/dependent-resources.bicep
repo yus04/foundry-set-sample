@@ -47,6 +47,7 @@ resource cosmosDB 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' = if(!cosmo
     disableLocalAuth: true
     enableAutomaticFailover: false
     enableMultipleWriteLocations: false
+    publicNetworkAccess: 'Disabled'
     enableFreeTier: false
     locations: [
       {
@@ -79,7 +80,7 @@ resource aiSearch 'Microsoft.Search/searchServices@2024-06-01-preview' = if(!aiS
     }
     hostingMode: 'default'
     partitionCount: 1
-    publicNetworkAccess: 'enabled'
+    publicNetworkAccess: 'disabled'
     replicaCount: 1
     semanticSearch: 'disabled'
   }
@@ -107,10 +108,10 @@ resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = if(!azureStora
   properties: {
     minimumTlsVersion: 'TLS1_2'
     allowBlobPublicAccess: false
-    publicNetworkAccess: 'Enabled'
+    publicNetworkAccess: 'Disabled'
     networkAcls: {
       bypass: 'AzureServices'
-      defaultAction: 'Allow'
+      defaultAction: 'Deny'
       virtualNetworkRules: []
     }
     allowSharedKeyAccess: false

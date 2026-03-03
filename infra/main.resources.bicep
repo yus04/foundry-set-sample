@@ -68,6 +68,16 @@ param projectDescription string = 'Microsoft Foundry project for building AI age
 param userPrincipalId string = ''
 
 // ============================================
+// Parameters - Enterprise Networking
+// ============================================
+
+@description('Publisher email for API Management')
+param apimPublisherEmail string = 'admin@contoso.com'
+
+@description('Publisher name for API Management')
+param apimPublisherName string = 'AI Platform Team'
+
+// ============================================
 // Variables - Resource Naming
 // ============================================
 
@@ -97,7 +107,7 @@ var storageName = '${storageNameTruncated}${nameHash}'
 // Cosmos DB: max 44 chars, lowercase alphanumeric and hyphens
 var cosmosNameBase = toLower(replace(baseName, '-', ''))
 var cosmosNameTruncated = substring(cosmosNameBase, 0, min(length(cosmosNameBase), 31))
-var cosmosDbName = '${cosmosNameBase}-cosmos-${nameHash}'
+var cosmosDbName = '${cosmosNameTruncated}-cosmos-${nameHash}'
 
 // Cognitive Services (AVM): max 64 chars, alphanumeric and hyphens
 var cognitiveServicesName = '${accountName}-cs'
@@ -105,6 +115,16 @@ var cognitiveServicesName = '${accountName}-cs'
 // Capability Host names
 var projectCapHostName = '${projectName}-caphost'
 var accountCapHostName = '${accountName}-caphost'
+
+// Log Analytics: max 63 chars
+var logAnalyticsName = '${toLower(baseName)}-law-${nameHash}'
+
+// AMPLS
+var amplsName = '${toLower(baseName)}-ampls-${nameHash}'
+
+// API Management: must be globally unique
+var apimNameBase = toLower(replace(baseName, '-', ''))
+var apimName = '${apimNameBase}-apim-${nameHash}'
 
 // ============================================
 // Module 1: Validate Existing Resources
@@ -116,6 +136,32 @@ module resourceValidator './modules/utils/resource-validator.bicep' = {
     aiSearchResourceId: existingAiSearchResourceId
     azureStorageAccountResourceId: existingStorageAccountResourceId
     azureCosmosDBAccountResourceId: existingCosmosDbAccountResourceId
+  }
+}
+
+// ============================================
+// Module: Deploy Virtual Network
+// ============================================
+
+module vnet './modules/networking/vnet.bicep' = {
+  name: 'deploy-vnet'
+  params: {
+    location: location
+    baseName: baseName
+    tags: tags
+  }
+}
+
+// ============================================
+// Module: Deploy Log Analytics
+// ============================================
+
+module logAnalytics './modules/monitoring/log-analytics.bicep' = {
+  name: 'deploy-log-analytics'
+  params: {
+    location: location
+    logAnalyticsName: logAnalyticsName
+    tags: tags
   }
 }
 
@@ -159,6 +205,61 @@ module aiAccount './modules/core/ai-account.bicep' = {
     modelVersion: modelVersion
     modelSkuName: modelSkuName
     modelCapacity: modelCapacity
+  }
+}
+
+// ============================================
+// Module: Deploy Private Endpoints
+// ============================================
+
+module privateEndpoints './modules/networking/private-endpoints.bicep' = {
+  name: 'deploy-private-endpoints'
+  params: {
+    location: location
+    tags: tags
+    vnetId: vnet.outputs.vnetId
+    subnetId: vnet.outputs.privateEndpointSubnetId
+    storageAccountId: dependentResources.outputs.azureStorageId
+    aiSearchId: dependentResources.outputs.aiSearchID
+    aiAccountId: aiAccount.outputs.accountID
+    cosmosDbAccountId: dependentResources.outputs.cosmosDBId
+    storageAccountName: dependentResources.outputs.azureStorageName
+    aiSearchName: dependentResources.outputs.aiSearchName
+    aiAccountName: aiAccount.outputs.accountName
+    cosmosDbAccountName: dependentResources.outputs.cosmosDBName
+  }
+}
+
+// ============================================
+// Module: Deploy AMPLS (Azure Monitor Private Link Scope)
+// ============================================
+
+module ampls './modules/monitoring/ampls.bicep' = {
+  name: 'deploy-ampls'
+  params: {
+    location: location
+    amplsName: amplsName
+    tags: tags
+    logAnalyticsId: logAnalytics.outputs.logAnalyticsId
+    logAnalyticsName: logAnalytics.outputs.logAnalyticsName
+    vnetId: vnet.outputs.vnetId
+    subnetId: vnet.outputs.privateEndpointSubnetId
+  }
+}
+
+// ============================================
+// Module: Deploy API Management (AI Gateway)
+// ============================================
+
+module apiManagement './modules/networking/api-management.bicep' = {
+  name: 'deploy-api-management'
+  params: {
+    location: location
+    apimName: apimName
+    tags: tags
+    aiAccountEndpoint: aiAccount.outputs.accountTarget
+    publisherEmail: apimPublisherEmail
+    publisherName: apimPublisherName
   }
 }
 
@@ -259,6 +360,30 @@ module projectCapabilityHost './modules/capabilities/project-capability-host.bic
 }
 
 // ============================================
+// Module: APIM Role Assignment for Cognitive Services
+// ============================================
+
+module apimRoleAssignment './modules/security/apim-cognitive-services-role.bicep' = {
+  name: 'assign-apim-cognitive-services-role'
+  params: {
+    aiAccountName: accountName
+    apimPrincipalId: apiManagement.outputs.apimPrincipalId
+  }
+}
+
+// ============================================
+// Module: Diagnostic Settings (Foundry → Log Analytics)
+// ============================================
+
+module diagnosticSettings './modules/monitoring/diagnostic-settings.bicep' = {
+  name: 'configure-diagnostic-settings'
+  params: {
+    aiAccountName: accountName
+    logAnalyticsId: logAnalytics.outputs.logAnalyticsId
+  }
+}
+
+// ============================================
 // Outputs
 // ============================================
 
@@ -288,3 +413,15 @@ output cosmosDbAccountName string = dependentResources.outputs.cosmosDBName
 
 @description('Deployment completed successfully')
 output deploymentStatus string = 'All resources deployed successfully. You can now start using Microsoft Foundry.'
+
+@description('Virtual Network name')
+output vnetName string = vnet.outputs.vnetName
+
+@description('Log Analytics workspace name')
+output logAnalyticsName string = logAnalytics.outputs.logAnalyticsName
+
+@description('API Management name')
+output apimName string = apiManagement.outputs.apimName
+
+@description('API Management gateway URL')
+output apimGatewayUrl string = apiManagement.outputs.apimGatewayUrl

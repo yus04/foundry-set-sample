@@ -46,6 +46,7 @@ param cosmosDbAccountName string
 
 var storageSuffix = environment().suffixes.storage
 
+// Standard private endpoint configs (1 PE → 1 DNS zone)
 var privateEndpointConfigs = [
   {
     dnsZoneName: 'privatelink.blob.${storageSuffix}'
@@ -60,12 +61,6 @@ var privateEndpointConfigs = [
     resourceName: aiSearchName
   }
   {
-    dnsZoneName: 'privatelink.cognitiveservices.azure.com'
-    groupId: 'account'
-    resourceId: aiAccountId
-    resourceName: aiAccountName
-  }
-  {
     dnsZoneName: 'privatelink.documents.azure.com'
     groupId: 'Sql'
     resourceId: cosmosDbAccountId
@@ -73,8 +68,15 @@ var privateEndpointConfigs = [
   }
 ]
 
+// AI Account requires multiple DNS zones for a single private endpoint
+var aiAccountDnsZoneNames = [
+  'privatelink.cognitiveservices.azure.com'
+  'privatelink.openai.azure.com'
+  'privatelink.services.ai.azure.com'
+]
+
 // ============================================
-// Private DNS Zones
+// Private DNS Zones (Standard)
 // ============================================
 
 resource privateDnsZones 'Microsoft.Network/privateDnsZones@2024-06-01' = [for config in privateEndpointConfigs: {
@@ -97,7 +99,30 @@ resource vnetLinks 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-0
 }]
 
 // ============================================
-// Private Endpoints
+// Private DNS Zones (AI Account - multi-zone)
+// ============================================
+
+resource aiAccountDnsZones 'Microsoft.Network/privateDnsZones@2024-06-01' = [for zone in aiAccountDnsZoneNames: {
+  name: zone
+  location: 'global'
+  tags: tags
+}]
+
+resource aiAccountVnetLinks 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = [for (zone, i) in aiAccountDnsZoneNames: {
+  parent: aiAccountDnsZones[i]
+  name: '${replace(zone, '.', '-')}-link'
+  location: 'global'
+  tags: tags
+  properties: {
+    virtualNetwork: {
+      id: vnetId
+    }
+    registrationEnabled: false
+  }
+}]
+
+// ============================================
+// Private Endpoints (Standard)
 // ============================================
 
 resource privateEndpoints 'Microsoft.Network/privateEndpoints@2024-05-01' = [for (config, i) in privateEndpointConfigs: {
@@ -136,6 +161,45 @@ resource dnsZoneGroups 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@
     ]
   }
 }]
+
+// ============================================
+// Private Endpoint (AI Account - multi-zone DNS)
+// ============================================
+
+resource aiAccountPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-05-01' = {
+  name: '${aiAccountName}-pe'
+  location: location
+  tags: tags
+  properties: {
+    subnet: {
+      id: subnetId
+    }
+    privateLinkServiceConnections: [
+      {
+        name: '${aiAccountName}-plsc'
+        properties: {
+          privateLinkServiceId: aiAccountId
+          groupIds: [
+            'account'
+          ]
+        }
+      }
+    ]
+  }
+}
+
+resource aiAccountDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2024-05-01' = {
+  parent: aiAccountPrivateEndpoint
+  name: 'default'
+  properties: {
+    privateDnsZoneConfigs: [for (zone, i) in aiAccountDnsZoneNames: {
+      name: replace(zone, '.', '-')
+      properties: {
+        privateDnsZoneId: aiAccountDnsZones[i].id
+      }
+    }]
+  }
+}
 
 // ============================================
 // Outputs

@@ -231,17 +231,32 @@ module privateEndpoints './modules/networking/private-endpoints.bicep' = {
 }
 
 // ============================================
-// Module: Deploy AMPLS (Azure Monitor Private Link Scope)
+// Module: Deploy AMPLS - Phase 1 (Scope + Resource)
 // ============================================
 
 module ampls './modules/monitoring/ampls.bicep' = {
   name: 'deploy-ampls'
   params: {
-    location: location
     amplsName: amplsName
     tags: tags
     logAnalyticsId: logAnalytics.outputs.logAnalyticsId
     logAnalyticsName: logAnalytics.outputs.logAnalyticsName
+  }
+}
+
+// ============================================
+// Module: Deploy AMPLS - Phase 2 (Private Endpoint + DNS)
+// Separate module ensures Scoped Resources are fully
+// provisioned before PE creation, avoiding RequiredMembers mismatch.
+// ============================================
+
+module amplsPrivateEndpoint './modules/monitoring/ampls-private-endpoint.bicep' = {
+  name: 'deploy-ampls-private-endpoint'
+  params: {
+    location: location
+    amplsName: amplsName
+    tags: tags
+    amplsId: ampls.outputs.amplsId
     vnetId: vnet.outputs.vnetId
     subnetId: vnet.outputs.privateEndpointSubnetId
     blobDnsZoneId: privateEndpoints.outputs.blobDnsZoneId

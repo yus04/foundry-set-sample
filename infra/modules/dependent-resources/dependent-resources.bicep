@@ -21,6 +21,9 @@ param azureStorageAccountResourceId string
 @description('The Cosmos DB Account full ARM Resource ID. This is an optional field, and if not provided, the resource will be created.')
 param cosmosDBResourceId string
 
+@description('Name of the AI Services account (used for Cosmos DB networkAclBypassResourceIds)')
+param aiAccountName string
+
 // param aiServiceExists bool
 param aiSearchExists bool
 param azureStorageExists bool
@@ -50,7 +53,9 @@ resource cosmosDB 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' = if(!cosmo
     publicNetworkAccess: 'Disabled'
     enableFreeTier: false
     networkAclBypass: 'AzureServices'
-    networkAclBypassResourceIds: []
+    networkAclBypassResourceIds: [
+      resourceId('Microsoft.CognitiveServices/accounts', aiAccountName)
+    ]
     locations: [
       {
         locationName: location

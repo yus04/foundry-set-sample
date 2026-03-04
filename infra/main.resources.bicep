@@ -179,6 +179,9 @@ module dependentResources './modules/dependent-resources/dependent-resources.bic
     azureStorageName: storageName
     cosmosDBName: cosmosDbName
     
+    // AI Account name (for Cosmos DB networkAclBypassResourceIds)
+    aiAccountName: accountName
+    
     // Existing resource IDs
     aiSearchResourceId: existingAiSearchResourceId
     azureStorageAccountResourceId: existingStorageAccountResourceId

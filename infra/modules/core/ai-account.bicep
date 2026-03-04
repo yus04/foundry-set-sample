@@ -7,9 +7,13 @@ param modelVersion string
 param modelSkuName string
 param modelCapacity int
 
-@description('Agent subnet resource ID for VNet rule')
+@description('Agent subnet resource ID for network injection')
 param agentSubnetId string
 
+@description('Enable network injection for agent service')
+param networkInjection string = 'true'
+
+#disable-next-line BCP036
 resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
   name: accountName
   location: location
@@ -25,16 +29,18 @@ resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
     customSubDomainName: accountName
     networkAcls: {
       defaultAction: 'Deny'
-      virtualNetworkRules: [
-        {
-          id: agentSubnetId
-          ignoreMissingVnetServiceEndpoint: true
-        }
-      ]
+      virtualNetworkRules: []
       ipRules: []
+      bypass: 'AzureServices'
     }
-    publicNetworkAccess: 'Enabled'
-
+    publicNetworkAccess: 'Disabled'
+    networkInjections: ((networkInjection == 'true') ? [
+      {
+        scenario: 'agent'
+        subnetArmId: agentSubnetId
+        useMicrosoftManagedNetwork: false
+      }
+    ] : null)
     // API-key based auth is not supported for the Agent service
     disableLocalAuth: false
   }

@@ -84,14 +84,9 @@ resource vnet 'Microsoft.Network/virtualNetworks@2024-05-01' = {
           networkSecurityGroup: {
             id: agentsNsg.id
           }
-          serviceEndpoints: [
-            {
-              service: 'Microsoft.CognitiveServices'
-            }
-          ]
           delegations: [
             {
-              name: 'Microsoft.App/environments'
+              name: 'Microsoft.app/environments'
               properties: {
                 serviceName: 'Microsoft.App/environments'
               }

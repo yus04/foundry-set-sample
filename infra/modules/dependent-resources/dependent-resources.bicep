@@ -49,6 +49,8 @@ resource cosmosDB 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' = if(!cosmo
     enableMultipleWriteLocations: false
     publicNetworkAccess: 'Disabled'
     enableFreeTier: false
+    networkAclBypass: 'AzureServices'
+    networkAclBypassResourceIds: []
     locations: [
       {
         locationName: location

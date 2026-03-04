@@ -7,6 +7,9 @@ param modelVersion string
 param modelSkuName string
 param modelCapacity int
 
+@description('Agent subnet resource ID for VNet rule')
+param agentSubnetId string
+
 resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
   name: accountName
   location: location
@@ -22,10 +25,15 @@ resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
     customSubDomainName: accountName
     networkAcls: {
       defaultAction: 'Deny'
-      virtualNetworkRules: []
+      virtualNetworkRules: [
+        {
+          id: agentSubnetId
+          ignoreMissingVnetServiceEndpoint: true
+        }
+      ]
       ipRules: []
     }
-    publicNetworkAccess: 'Disabled'
+    publicNetworkAccess: 'Enabled'
 
     // API-key based auth is not supported for the Agent service
     disableLocalAuth: false

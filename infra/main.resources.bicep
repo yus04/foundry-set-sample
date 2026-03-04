@@ -179,9 +179,6 @@ module dependentResources './modules/dependent-resources/dependent-resources.bic
     azureStorageName: storageName
     cosmosDBName: cosmosDbName
     
-    // AI Account name (for Cosmos DB networkAclBypassResourceIds)
-    aiAccountName: accountName
-    
     // Existing resource IDs
     aiSearchResourceId: existingAiSearchResourceId
     azureStorageAccountResourceId: existingStorageAccountResourceId
@@ -203,6 +200,7 @@ module aiAccount './modules/core/ai-account.bicep' = {
   params: {
     accountName: accountName
     location: location
+    agentSubnetId: vnet.outputs.agentsSubnetId
     modelName: modelName
     modelFormat: modelFormat
     modelVersion: modelVersion

@@ -373,6 +373,7 @@ module projectCapabilityHost './modules/capabilities/project-capability-host.bic
   }
   dependsOn: [
     roleAssignments
+    privateEndpoints
   ]
 }
 

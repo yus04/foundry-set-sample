@@ -25,15 +25,19 @@ resource accountCapabilityHost 'Microsoft.CognitiveServices/accounts/capabilityH
    parent: account
    properties: {
      capabilityHostKind: 'Agents'
-
+     vectorStoreConnections: vectorStoreConnections
+     storageConnections: storageConnections
+     threadStorageConnections: threadConnections
    }
 }
 
 
+#disable-next-line BCP037
 resource projectCapabilityHost 'Microsoft.CognitiveServices/accounts/projects/capabilityHosts@2025-04-01-preview' = {
   name: projectCapHost
   parent: project
   properties: {
+    #disable-next-line BCP037
     capabilityHostKind: 'Agents'
     vectorStoreConnections: vectorStoreConnections
     storageConnections: storageConnections

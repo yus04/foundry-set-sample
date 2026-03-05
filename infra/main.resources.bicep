@@ -114,7 +114,6 @@ var cognitiveServicesName = '${accountName}-cs'
 
 // Capability Host names
 var projectCapHostName = '${projectName}-caphost'
-var accountCapHostName = '${accountName}-caphost'
 
 // Log Analytics: max 63 chars
 var logAnalyticsName = '${toLower(baseName)}-law-${nameHash}'
@@ -206,7 +205,6 @@ module aiAccount './modules/core/ai-account.bicep' = {
     modelVersion: modelVersion
     modelSkuName: modelSkuName
     modelCapacity: modelCapacity
-    accountCapHostName: accountCapHostName
   }
 }
 

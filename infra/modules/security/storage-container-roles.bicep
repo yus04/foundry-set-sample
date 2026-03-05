@@ -20,13 +20,18 @@ resource storageBlobDataOwner 'Microsoft.Authorization/roleDefinitions@2022-04-0
   scope: resourceGroup()
 }
 
-// Assign Storage Blob Data Owner role
+// ABAC condition: Allow all non-tag operations; for tag operations, restrict to agent containers
+var conditionStr = '((!(ActionMatches{\'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/tags/read\'})  AND  !(ActionMatches{\'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/filter/action\'}) AND  !(ActionMatches{\'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/tags/write\'}) ) OR (@Resource[Microsoft.Storage/storageAccounts/blobServices/containers:name] StringStartsWithIgnoreCase \'${workspaceId}\' AND @Resource[Microsoft.Storage/storageAccounts/blobServices/containers:name] StringLikeIgnoreCase \'*-azureml-agent\'))'
+
+// Assign Storage Blob Data Owner role with ABAC condition for agent service
 resource storageBlobDataOwnerAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   scope: storage
-  name: guid(storage.id, aiProjectPrincipalId, storageBlobDataOwner.id)
+  name: guid(storageBlobDataOwner.id, storage.id, aiProjectPrincipalId)
   properties: {
     principalId: aiProjectPrincipalId
     roleDefinitionId: storageBlobDataOwner.id
     principalType: 'ServicePrincipal'
+    conditionVersion: '2.0'
+    condition: conditionStr
   }
 }

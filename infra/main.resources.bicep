@@ -206,6 +206,7 @@ module aiAccount './modules/core/ai-account.bicep' = {
     modelVersion: modelVersion
     modelSkuName: modelSkuName
     modelCapacity: modelCapacity
+    accountCapHostName: accountCapHostName
   }
 }
 
@@ -364,7 +365,6 @@ module projectCapabilityHost './modules/capabilities/project-capability-host.bic
     accountName: accountName
     projectName: projectName
     projectCapHost: projectCapHostName
-    accountCapHost: accountCapHostName
     
     // Connection names
     cosmosDBConnection: aiProject.outputs.cosmosDBConnection
@@ -372,6 +372,7 @@ module projectCapabilityHost './modules/capabilities/project-capability-host.bic
     aiSearchConnection: aiProject.outputs.aiSearchConnection
   }
   dependsOn: [
+    aiAccount
     roleAssignments
     privateEndpoints
   ]

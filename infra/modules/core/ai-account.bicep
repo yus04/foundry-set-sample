@@ -13,6 +13,9 @@ param agentSubnetId string
 @description('Enable network injection for agent service')
 param networkInjection string = 'true'
 
+@description('Name for the account-level capability host')
+param accountCapHostName string
+
 #disable-next-line BCP036
 resource account 'Microsoft.CognitiveServices/accounts@2025-04-01-preview' = {
   name: accountName
@@ -59,6 +62,18 @@ resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-
       format: modelFormat
       version: modelVersion
     }
+  }
+}
+
+// ============================================
+// Account-level Capability Host
+// ============================================
+
+resource accountCapabilityHost 'Microsoft.CognitiveServices/accounts/capabilityHosts@2025-04-01-preview' = {
+  name: accountCapHostName
+  parent: account
+  properties: {
+    capabilityHostKind: 'Agents'
   }
 }
 

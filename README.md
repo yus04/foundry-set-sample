@@ -1,6 +1,6 @@
 # Microsoft Foundry - Standard Setup
 
-このプロジェクトは、Microsoft Foundry とその依存リソースを一括デプロイするための Bicep テンプレートです。
+このプロジェクトは、Microsoft Foundry とその依存リソースを閉域環境に一括デプロイするための Bicep テンプレートです。
 
 ## 📋 目的と概要
 
@@ -8,25 +8,54 @@
 
 ### デプロイされるリソース
 
+#### コアリソース
+
 | リソース | 目的 | 説明 |
 |---------|------|------|
-| **AI Services Account** | AIモデルホスティング | Azure OpenAI (gpt-4o) などのAIモデルを提供 |
+| **AI Services Account** | AIモデルホスティング | Azure OpenAI (gpt-4o, GlobalStandard) などのAIモデルを提供。ネットワークインジェクション対応 |
 | **Cognitive Services** | マルチサービスAI | Decision、Language、Speech、Vision、Applied AIを統合した単一リソース |
 | **AI Project** | プロジェクト管理 | AI Agent の開発・管理プロジェクト |
-| **AI Search** | ベクトル検索 | RAG（検索拡張生成）のためのベクトル検索サービス |
-| **Storage Account** | データ保存 | Blob ストレージによるデータ永続化 |
-| **Cosmos DB** | ドキュメントDB | NoSQL データベース（会話履歴、メタデータ等） |
+
+#### 依存リソース
+
+| リソース | 目的 | 説明 |
+|---------|------|------|
+| **AI Search** | ベクトル検索 | RAG（検索拡張生成）のためのベクトル検索サービス（Standard tier、パブリックアクセス無効） |
+| **Storage Account** | データ保存 | Blob ストレージによるデータ永続化（StorageV2、TLS 1.2、パブリックアクセス無効） |
+| **Cosmos DB** | ドキュメントDB | NoSQL データベース（会話履歴、メタデータ等）。ローカル認証無効、パブリックアクセス無効 |
+
+#### ネットワークリソース
+
+| リソース | 目的 | 説明 |
+|---------|------|------|
+| **Virtual Network** | ネットワーク分離 | 10.0.0.0/16 のアドレス空間。Private Endpoint 用サブネットと Agent 用サブネットの2つを構成 |
+| **Network Security Groups** | ネットワークセキュリティ | Private Endpoint 用 NSG と Agent 用 NSG の2つを自動作成 |
+| **Private Endpoints** | プライベート接続 | Storage、AI Search、Cosmos DB、AI Account へのプライベートエンドポイント。各プライベートDNSゾーンも自動構成 |
+| **API Management** | AI Gateway | Developer tier の API Management。Azure OpenAI API のプロキシ・トークン制限・メトリクス発行を構成。マネージド ID 認証対応 |
+
+#### 監視リソース
+
+| リソース | 目的 | 説明 |
+|---------|------|------|
+| **Log Analytics Workspace** | ログ収集・分析 | PerGB2018 SKU、保持期間30日。パブリックインジェスト無効 |
+| **Azure Monitor Private Link Scope (AMPLS)** | 監視のプライベート接続 | Log Analytics へのプライベートリンクスコープ。Private Endpoint 経由でのログ収集 |
+| **Diagnostic Settings** | 診断ログ | AI Services Account の全ログ・全メトリクスを Log Analytics に送信 |
 
 #### Azure ポータルでのリソース一覧
 
 ![リソース一覧](assets/resources.png)
 
+![リソースビジュアライザー](assets/resources-visualizer.png)
+
 ### 自動設定される機能
 
 ✅ **マネージドIDによる認証**: パスワード不要のセキュアな認証  
 ✅ **自動ロール割り当て**: AI Projectが各リソースにアクセスできるよう、必要なRBACロールを自動付与  
-✅ **Agent Service設定**: AI Agentの実行環境を自動構成  
-✅ **リソース接続**: AI Project と依存リソース間の接続を自動作成
+✅ **Agent Service設定**: AI Agentの実行環境を自動構成（Capability Host の自動作成）  
+✅ **リソース接続**: AI Project と依存リソース間の接続を自動作成  
+✅ **ネットワーク分離**: VNet + Private Endpoint による全リソースのプライベートネットワーク構成  
+✅ **AI Gateway**: API Management によるトークン制限・認証プロキシの自動構成  
+✅ **監視基盤**: Log Analytics + AMPLS + Diagnostic Settings によるログ・メトリクスの一元管理
 
 ### 🔐 ロール構成の全体像（最小権限の原則）
 
@@ -210,6 +239,20 @@ azd env get-values | grep aiAccountEndpoint
 
 ---
 
+## 🔒 閉域環境へのアクセス
+
+この Bicep テンプレートでは、**すべてのリソースのパブリックネットワークアクセスが無効**に設定されています。Azure AI Foundry ポータルや各リソースへのアクセスには、デプロイ先 VNet と同一ネットワーク上からの接続が必要です。
+
+### アクセス方法の選択肢
+
+| 方法 | 概要 | 適したケース |
+|------|------|------|
+| **Azure Bastion** | VNet 内の踏み台 VM にブラウザ経由で接続（SSH/RDP ポート不要） | 個人・小規模チームでの管理作業 |
+| **Point-to-Site VPN** | クライアント PC から VNet へ VPN 接続 | 開発者の日常的な作業 |
+| **Site-to-Site VPN / ExpressRoute** | オンプレミスネットワークと VNet を専用回線で接続 | 企業ネットワークとの統合 |
+
+---
+
 ## ⚙️ パラメータ詳細
 
 ### 必須パラメータ
@@ -224,10 +267,14 @@ azd env get-values | grep aiAccountEndpoint
 | パラメータ | デフォルト値 | 説明 | 設定場所 |
 |-----------|------------|------|---------|
 | `modelName` | `gpt-4o` | デプロイするAIモデル | `infra/main.parameters.json` |
+| `modelFormat` | `OpenAI` | モデルフォーマット | `infra/main.parameters.json` |
 | `modelVersion` | `2024-08-06` | モデルバージョン | `infra/main.parameters.json` |
-| `modelCapacity` | `100` | モデルのTPM（1分あたりのトークン数）容量 | `infra/main.parameters.json` |
+| `modelSkuName` | `GlobalStandard` | モデルデプロイメントの SKU（`Standard` / `GlobalStandard`） | `infra/main.parameters.json` |
+| `modelCapacity` | `100` | モデルのTPM（1分あたりのトークン数）容量（1〜1000） | `infra/main.parameters.json` |
 | `projectDisplayName` | `AI Agent Project` | プロジェクトの表示名 | `infra/main.parameters.json` |
-| `projectDescription` | - | プロジェクトの説明 | `infra/main.parameters.json` |
+| `projectDescription` | `Microsoft Foundry project for building AI agents` | プロジェクトの説明 | `infra/main.parameters.json` |
+| `apimPublisherEmail` | `admin@contoso.com` | API Management の発行者メールアドレス | `infra/main.parameters.json` |
+| `apimPublisherName` | `AI Platform Team` | API Management の発行者名 | `infra/main.parameters.json` |
 
 ### 既存リソースの使用（オプション）
 
@@ -295,14 +342,16 @@ AI Projectのシステム割り当てマネージドIDに対して、以下の�
 ├── azure.yaml                              # Azure Developer CLI 設定
 ├── infra/                                  # インフラストラクチャコード
 │   ├── main.bicep                          # エントリーポイント（サブスクリプションスコープ）
-│   ├── main.resources.bicep                # リソースデプロイメント
+│   ├── main.resources.bicep                # リソースデプロイメント（全モジュールのオーケストレーション）
 │   ├── main.parameters.json                # パラメータ設定ファイル ★重要★
 │   └── modules/                            # モジュール
 │       ├── core/                           # AI Account & Project
 │       ├── dependent-resources/            # AI Search, Storage, Cosmos DB
+│       ├── networking/                     # VNet, Private Endpoints, API Management
+│       ├── monitoring/                     # Log Analytics, AMPLS, Diagnostic Settings
 │       ├── security/                       # ロール割り当て
-│       ├── capabilities/                   # Agent Service設定
-│       └── utils/                          # ユーティリティ
+│       ├── capabilities/                   # Agent Service設定（Capability Host）
+│       └── utils/                          # ユーティリティ（リソース検証、ID変換）
 ├── README.md                               # このファイル
 └── DEPLOYMENT-GUIDE.md                     # 詳細デプロイガイド
 ```
@@ -402,11 +451,23 @@ az ad group list --query "[?displayName=='AI Engineers'].{Name:displayName, Obje
 
 **A**: 主なコスト要因：
 - **Azure OpenAI**: 使用量課金（トークン数による）
-- **AI Search**: Basic tier（約5,000円/月〜）
+- **AI Search**: Standard tier（約15,000円/月〜）
 - **Storage Account**: 使用量課金（数百円〜）
-- **Cosmos DB**: Serverlessモード（使用量課金）
+- **Cosmos DB**: Standard（使用量課金）
+- **API Management**: Developer SKU（約5,000円/月〜）
+- **Log Analytics**: PerGB2018（使用量課金）
 
-開発環境で小規模利用の場合、月額1万円程度が目安です。
+開発環境で小規模利用の場合、月額2〜3万円程度が目安です。
+
+### Q6: デプロイ後、Azure AI Foundry ポータルに接続できません
+
+**A**: このテンプレートはすべてのリソースのパブリックアクセスを無効にした**完全閉域構成**です。Azure AI Foundry ポータル（`https://ai.azure.com`）にアクセスするには、デプロイ先 VNet と同一ネットワークからの接続が必要です。
+
+推奨アクセス方法:
+1. **Azure Bastion + 踏み台 VM**: VNet 内に VM を作成し、Azure Bastion 経由でブラウザ接続
+2. **Point-to-Site VPN**: クライアント PC から VNet へ VPN 接続し、ローカルブラウザで接続
+
+詳細は「[🔒 閉域環境へのアクセス](#-閉域環境へのアクセス)」セクションを参照してください。
 
 ---
 

@@ -209,6 +209,20 @@ module aiAccount './modules/core/ai-account.bicep' = {
 }
 
 // ============================================
+// Module: Foundry IQ Embedding Access from AI Search
+// ============================================
+
+module aiSearchFoundryAccess './modules/networking/ai-search-foundry-access.bicep' = {
+  name: 'configure-ai-search-foundry-access'
+  params: {
+    aiAccountName: aiAccount.outputs.accountName
+    aiSearchName: dependentResources.outputs.aiSearchName
+    aiSearchResourceGroupName: dependentResources.outputs.aiSearchServiceResourceGroupName
+    aiSearchSubscriptionId: dependentResources.outputs.aiSearchServiceSubscriptionId
+  }
+}
+
+// ============================================
 // Module: Deploy Private Endpoints
 // ============================================
 

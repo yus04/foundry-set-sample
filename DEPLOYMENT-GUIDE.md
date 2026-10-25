@@ -159,6 +159,12 @@ USER_OBJECT_ID=your-user-object-id
 - `Search Index Data Contributor`
 - `Search Service Contributor`
 
+#### AI Search のマネージド ID → Foundry
+- `Cognitive Services OpenAI User`
+- `Cognitive Services User`
+
+上記 2 ロールは、この IaC がデプロイする Foundry の AI Services Account 単位で付与します。
+
 #### Cosmos DB
 - `Cosmos DB Operator`
 - `Cosmos DB Built-in Data Contributor`
@@ -166,6 +172,26 @@ USER_OBJECT_ID=your-user-object-id
 #### Storage Account
 - `Storage Blob Data Contributor`
 - `Storage Blob Data Owner` (コンテナスコープ)
+
+### Foundry IQ の Embedding モデルへのプライベート接続
+
+`azure.yaml` が参照する `infra/main.bicep` / `infra/main.resources.bicep` では、次の設定を自動実行します。旧テンプレートの `azuredeploy.json` は対象外です。
+
+1. AI Search のシステム割り当てマネージド ID に上記 2 ロールを付与します。
+2. AI Search に Shared Private Link を作成します。
+   - Resource Type: `Microsoft.CognitiveServices/accounts`
+   - Resource: この IaC でデプロイする Foundry リソース（追加の Cognitive Services リソースではありません）
+   - Target sub-resource (group ID): `openai_account`
+   - Request message: Search 名と、Search / Foundry のリソース ID から生成した識別子を含むメッセージ
+3. Shared Private Link の作成完了後、Foundry 側で同じメッセージを持つ接続だけを `Approved` に更新します。他の接続は承認しません。対象が 0 件または複数件の場合はデプロイを失敗させます。
+
+承認後も識別用メッセージを保持するため、同じリソースへの再デプロイでも対象の接続を再利用できます。既存 AI Search を指定した場合も、そのサブスクリプションとリソースグループに Shared Private Link を作成します。既存サービスでは、システム割り当てマネージド ID を事前に有効にしてください。
+
+デプロイ実行者には、Foundry 側の `Microsoft.CognitiveServices/accounts/privateEndpointConnections/write` と、Search 側の `Microsoft.Search/searchServices/sharedPrivateLinkResources/write`（および両リソースの読み取り）の権限が必要です。通常の Contributor に加え、ロール割り当て用の権限も必要です。Search が別のサブスクリプションやリソースグループにある場合は、そちらにもデプロイ権限が必要です。
+
+デプロイ後は、AI Search の **Networking → Shared private access** で対象接続が `Approved` / `Succeeded`、Foundry の **Networking → Private endpoint connections** で対象接続が `Approved` になっていることを確認してください。RBAC と接続状態の反映には数分かかる場合があります。
+
+この変更は Embedding モデル自体をデプロイしません。Foundry IQ で利用する Embedding モデルは、同じ Foundry リソースに別途デプロイし、Search のベクトライザーなどでそのデプロイ名とマネージド ID 認証を指定してください。インデクサーを使用する場合は、[Shared Private Link の公式手順](https://learn.microsoft.com/azure/search/search-indexer-howto-access-private)に従い、プライベート実行環境も設定してください。既存の VNet 用 Private Endpoint とパブリックアクセス無効の設定は変更しません。
 
 ## 高度な使用例
 

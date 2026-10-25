@@ -31,6 +31,7 @@
 | **Virtual Network** | ネットワーク分離 | 10.0.0.0/16 のアドレス空間。Private Endpoint 用サブネットと Agent 用サブネットの2つを構成 |
 | **Network Security Groups** | ネットワークセキュリティ | Private Endpoint 用 NSG と Agent 用 NSG の2つを自動作成 |
 | **Private Endpoints** | プライベート接続 | Storage、AI Search、Cosmos DB、AI Account へのプライベートエンドポイント。各プライベートDNSゾーンも自動構成 |
+| **Shared Private Link** | Foundry IQ のモデル接続 | AI Search から Foundry の Embedding モデルへの `openai_account` 接続を作成し、Foundry 側で自動承認 |
 | **API Management** | AI Gateway | Developer tier の API Management。Azure OpenAI API のプロキシ・トークン制限・メトリクス発行を構成。マネージド ID 認証対応 |
 
 #### 監視リソース
@@ -76,6 +77,10 @@
 | リソース | ロール | スコープ | 目的 |
 |---------|-------|---------|------|
 | **Storage Account** | Storage Blob Data Reader | リソース単位 | Blob コンテナの読み取り（ナレッジソースのインデックス作成） |
+| **AI Services Account (Foundry)** | Cognitive Services OpenAI User | リソース単位 | Foundry IQ から Embedding モデルを呼び出す |
+| **AI Services Account (Foundry)** | Cognitive Services User | リソース単位 | Foundry IQ のモデル利用に必要な Cognitive Services アクセス |
+
+Shared Private Link の作成と Foundry 側の承認も自動実行します。Embedding モデル自体のデプロイと利用時の設定、既存 AI Search を使う場合の前提条件は、[デプロイガイド](DEPLOYMENT-GUIDE.md#foundry-iq-の-embedding-モデルへのプライベート接続)を参照してください。
 
 #### グループメンバーのロール（USER_PRINCIPAL_IDで指定したグループに所属するユーザー）
 
